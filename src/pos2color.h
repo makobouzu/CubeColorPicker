@@ -12,7 +12,6 @@
 using VertexColorPair = std::pair<glm::vec3, ofColor>;
 namespace amako {
 
-
 inline ofColor pos2color(const glm::vec3& target, const std::vector<VertexColorPair>& vertex){
     glm::vec3 emphasisPosition = calculation::emphasisPos(vertex);
     ofColor emphasisColor = calculation::emphasisCol(vertex);

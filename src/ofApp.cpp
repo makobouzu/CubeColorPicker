@@ -1,12 +1,13 @@
 #include "ofApp.h"
 
-const std::vector<VertexColorPair> meshToVertexColorPair(const ofMesh& mesh){
+const std::vector<VertexColorPair> mesh2VertexColorPair(const ofMesh& mesh){
     std::vector<VertexColorPair> ret;
     for(auto i = 0; i < mesh.getVertices().size(); ++i){
         ret.push_back(std::make_pair(mesh.getVertex(i), mesh.getColor(i)));
     }
     return ret;
 }
+//std::vector<VertexColorPair> vertex = mesh2VertexColorPair(mesh);
 
 std::vector<VertexColorPair> vertex{
     { glm::vec3{100, 500,    0.0}, ofColor{232,  52,  34} },
@@ -26,6 +27,18 @@ void ofApp::setup(){
     ofSetFrameRate(60);
     emphasisPosition = calculation::emphasisPos(vertex);
     cam.lookAt(emphasisPosition);
+    
+    //guide
+    for(auto i = 100; i <= 500; i += 10){
+        for(auto j = 100; j <= 500; j += 10){
+            for(auto k = 0; k  >= -400; k -= 10){
+                glm::vec3 pos = {i, j, k};
+                ofColor color = amako::pos2color(pos, vertex);
+                vboMesh.addVertex(pos);
+                vboMesh.addColor(color);
+            }
+        }
+    }
     
 }
 
@@ -47,12 +60,14 @@ void ofApp::draw(){
         ofSetColor(vertex.at(i).second);
         ofDrawSphere(vertex.at(i).first, 10);
     }
+    vboMesh.draw(OF_MESH_POINTS);
 
     ofColor targetCol = amako::pos2color(target, vertex);
     ofSetColor(targetCol);
-    ofDrawSphere(target, 13);
+    ofDrawSphere(target, 10);
     
     cam.end();
+    
     
     ofSetColor(targetCol);
     ofDrawRectangle(10, 10, 50, 50);
@@ -80,7 +95,7 @@ void ofApp::keyPressed(int key){
     }
     
     if(key == ' '){
-        ofColor color = amako::pos2color(glm::vec3{100, 100, 100}, vertex);
+        ofColor color = amako::pos2color(target, vertex);
         cout << color << endl;
     }
 }
