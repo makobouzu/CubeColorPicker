@@ -33,12 +33,31 @@ inline glm::vec3 vectorMinus(const glm::vec3& v1, const glm::vec3& v2){
     return v;
 }
 
+inline float distance(const glm::vec3& pos1, const glm::vec3& pos2){
+    float distance;
+    distance = sqrt(pow(pos2.x - pos1.x, 2.0) + pow(pos2.y - pos1.y, 2.0) + pow(pos2.z - pos1.z, 2.0));
+    return distance;
+}
 
+inline bool dividingPoint(const glm::vec3& intersection, const glm::vec3& pos1, const glm::vec3& pos2){
+    float distance = detail::distance(pos1, pos2);
+    float pos1Tointer = detail::distance(pos1, intersection);
+    float pos2Tointer = detail::distance(pos2, intersection);
+    float ratio1 = pos1Tointer / distance;
+    float ratio2 = pos2Tointer / distance;
+    
+    if(int(distance) == int(pos1Tointer+pos2Tointer)){
+        //inside point
+        return true;
+    }else{
+        //outside point
+        return false;
+    }
+}
 
 }
 
 //--------------------------------------------------------------
-
 inline glm::vec3 emphasisPos(const std::vector<VertexColorPair>& vertex){
     glm::vec3 sum, emphasis;
     for(auto&& v: vertex){
@@ -101,7 +120,7 @@ inline glm::vec3 planeIntersection(const glm::vec3& target, const std::vector<Ve
     c = (pos1.x - pos0.x)*(pos2.y - pos0.y)-(pos2.x - pos0.x)*(pos1.y - pos0.y);
     d = -1*(a*pos0.x + b*pos0.y + c*pos0.z);
     
-//  line
+//  line vector
     glm::vec3 v = detail::vectorMinus(emphasis, target);
     
     glm::vec3 intersection;
@@ -110,14 +129,10 @@ inline glm::vec3 planeIntersection(const glm::vec3& target, const std::vector<Ve
     intersection.z = ((a*v.x + b*v.y)*emphasis.z - v.z*(a*emphasis.x + b*emphasis.y + d)) / (a*v.x + b*v.y + c*v.z);
     
     return intersection;
-
 }
 
 //find 2D point line and line(through emphasis & target)
-inline glm::vec3 lineIntersection(const glm::vec3& target, const std::vector<VertexColorPair>& neighbor, const glm::vec3& emphasis){
-    glm::vec3 pos1, pos2;
-    pos1  = neighbor.at(0).first;
-    pos2  = neighbor.at(1).first;
+inline glm::vec3 lineIntersection(const glm::vec3& target, const glm::vec3& emphasis, const glm::vec3 pos1, glm::vec3 pos2){
     
     glm::vec3 intersection;
     if(target.z == pos1.z){
@@ -143,7 +158,7 @@ inline glm::vec3 lineIntersection(const glm::vec3& target, const std::vector<Ver
             
         intersection.x = (d - b)/(a - c);
         intersection.y = (a*d - b*c)/(a - c);
-        intersection.z = pos2.z;
+        intersection.z = pos1.z;
     }else if(target.y == pos1.y){
         // x = az + b of x = b
         float a, b;
@@ -166,7 +181,7 @@ inline glm::vec3 lineIntersection(const glm::vec3& target, const std::vector<Ver
         }
             
         intersection.x = (a*d - b*c)/(a - c);
-        intersection.y = pos2.y;
+        intersection.y = pos1.y;
         intersection.z = (d - b)/(a - c);
         
     }else if(target.x == pos1.x){
@@ -190,7 +205,7 @@ inline glm::vec3 lineIntersection(const glm::vec3& target, const std::vector<Ver
             d = -1*(target.z - emphasis.z) * emphasis.y + emphasis.z;
         }
             
-        intersection.x = pos2.x;
+        intersection.x = pos1.x;
         intersection.y = (d - b)/(a - c);
         intersection.z = (a*d - b*c)/(a - c);
     }
@@ -206,8 +221,8 @@ inline ofColor intersectionColor(const glm::vec3& intersection, const std::vecto
     ofColor pos2Col = neighborVertex.at(1).second;
 
     ofColor color;
-    float disLine = sqrt(pow(pos2.x - pos1.x, 2.0) + pow(pos2.y - pos1.y, 2.0) + pow(pos2.z - pos1.z, 2.0));
-    float pos1inter = sqrt(pow(pos1.x - intersection.x, 2.0) + pow(pos1.y - intersection.y, 2.0) + pow(pos1.z - intersection.z, 2.0));
+    float disLine = detail::distance(pos1, pos2);
+    float pos1inter = detail::distance(intersection, pos1);
     float ratio = pos1inter / disLine;
 
     if(ratio > 1){
@@ -222,8 +237,8 @@ inline ofColor intersectionColor(const glm::vec3& intersection, const std::vecto
 inline ofColor targetColor(const glm::vec3& target, const glm::vec3& intersection, const ofColor& interCol, const glm::vec3& point, const ofColor& pointCol){
     
     ofColor color;
-    float distance = sqrt(pow(intersection.x - point.x, 2.0) + pow(intersection.y - point.y, 2.0) + pow(intersection.z - point.z, 2.0));
-    float point2target = sqrt(pow(point.x - target.x, 2.0) + pow(point.y - target.y, 2.0) + pow(point.z - target.z, 2.0));
+    float distance = detail::distance(point, intersection);
+    float point2target = detail::distance(target, point);
     float ratio = point2target / distance;
     
     if(target == point){

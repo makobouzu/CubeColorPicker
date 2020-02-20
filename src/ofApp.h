@@ -15,8 +15,6 @@ public:
 private:
     glm::vec3 emphasisPosition;
     glm::vec3 target = {250, 300, -100};
-    
     ofVboMesh vboMesh;
-    
     ofEasyCam cam;
 };
